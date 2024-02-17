@@ -38,9 +38,33 @@ export class AuthCryptoService {
     return encryptedString;
   }
 
+  decrypt(encryptedString: string): string {
+    const [encryptedValue, nonce] = encryptedString.split(':');
+
+    const decryptedString = this.convertUint8ArrayToString(
+      nacl.secretbox.open(
+        this.convertStringToUnint8Array(encryptedValue, 'hex'),
+        this.convertStringToUnint8Array(nonce, 'hex'),
+        this.convertStringToUnint8Array(config.encryptionKey),
+      ),
+    );
+
+    return decryptedString;
+  }
+
   async hash(plainString: string): Promise<string> {
     const sha512 = nacl.hash(Uint8Array.from(Buffer.from(plainString)));
     return argon2.hash(this.convertUint8ArrayToString(sha512, 'hex'));
+  }
+
+  async verifyPassword({ password, passwordFromDb }): Promise<boolean> {
+    const passwordSha512 = nacl.hash(Uint8Array.from(Buffer.from(password)));
+
+    // Prevent time based attack
+    return argon2.verify(
+      passwordFromDb ?? (await this.STUB_PASSWORD),
+      this.convertUint8ArrayToString(passwordSha512, 'hex'),
+    );
   }
 
   async encryptString(plainString: string): Promise<string> {

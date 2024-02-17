@@ -103,13 +103,18 @@ export class AuthService {
       email: lowerCaseEmail,
     });
 
-    // mock logic {
-    const isPasswordVerified = userFromDb.password === password;
+    const decryptedPassword = this.authCryptoService.decrypt(
+      userFromDb.password,
+    );
+
+    const isPasswordVerified = await this.authCryptoService.verifyPassword({
+      password,
+      passwordFromDb: decryptedPassword,
+    });
 
     if (!isPasswordVerified) {
-      throw new BadRequestException('Wrong credentials!');
+      throw new BadRequestException('Wrong credentials.');
     }
-    // } mock logic
 
     const [accessToken, refreshToken] = this.getBothAccessAndRefreshTokens(
       userFromDb.id,
