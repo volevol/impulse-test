@@ -6,7 +6,7 @@ import { UserEntity } from './entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
+  @Get('findMany')
   async findMany(): Promise<UserEntity[]> {
     const usersFromDb = await this.userService.findMany();
 
@@ -14,8 +14,8 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserEntity> {
-    const userFromDb = await this.userService.findOne(+id);
+  async findOne(@Param('id') id: number): Promise<UserEntity> {
+    const userFromDb = await this.userService.findOne({ id });
 
     return new UserEntity(userFromDb);
   }

@@ -1,4 +1,5 @@
 import { User } from '@prisma/client';
+import { Exclude } from 'class-transformer';
 
 export class UserEntity implements User {
   constructor(partial: Partial<UserEntity>) {
@@ -11,6 +12,6 @@ export class UserEntity implements User {
   token: string;
   refreshToken: string;
 
-  // exclude this from server response
+  @Exclude()
   password: string;
 }
