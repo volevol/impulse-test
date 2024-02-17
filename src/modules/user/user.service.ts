@@ -16,14 +16,38 @@ export class UserService {
   }
 
   async findOne(dto: FindOneUserDto): Promise<User> {
-    const user = await this.prisma.user.findUnique({
-      where: { ...(dto as Prisma.UserWhereUniqueInput) },
-    });
+    try {
+      const user: User = await this.prisma.user.findUniqueOrThrow({
+        where: { ...(dto as Prisma.UserWhereUniqueInput) },
+      });
 
-    if (!user) {
-      throw new NotFoundException('No user with such id or email');
+      return user;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('No user with such id or email');
+        } else {
+          throw error;
+        }
+      }
     }
+  }
 
-    return user;
+  async findOneByToken({ token }: any): Promise<User> {
+    try {
+      const user: User = await this.prisma.user.findFirstOrThrow({
+        where: { token },
+      });
+
+      return user;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('No user with such token');
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }

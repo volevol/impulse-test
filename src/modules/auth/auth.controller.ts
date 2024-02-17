@@ -6,17 +6,18 @@ import {
   SignUpRequestDto,
   SignUpResponseDto,
 } from './auth.dto';
+import { routes } from '../../utils/constants/common';
 
-@Controller('auth')
+@Controller(routes.auth.root)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signUp')
+  @Post(routes.auth.signUp)
   async signUp(@Body() dto: SignUpRequestDto): Promise<SignUpResponseDto> {
     return this.authService.signUp(dto);
   }
 
-  @Post('signIn')
+  @Post(routes.auth.signIn)
   async signIn(@Body() dto: SignInRequestDto): Promise<SignInResponseDto> {
     return this.authService.signIn(dto);
   }
