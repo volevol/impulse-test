@@ -6,6 +6,7 @@ export const routes = {
     root: 'auth',
     signUp: 'signup',
     signIn: 'signin',
+    signOut: 'signout',
     refresh: 'refresh',
   },
   user: {

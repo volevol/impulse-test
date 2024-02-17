@@ -25,6 +25,11 @@ export class AuthController {
     return this.authService.signIn(dto);
   }
 
+  @Post(routes.auth.signOut)
+  async signOut(@User() user: UserRequestObject): Promise<void> {
+    return this.authService.signOut(user);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post(routes.auth.refresh)
   async refreshTokens(

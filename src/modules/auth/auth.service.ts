@@ -125,6 +125,13 @@ export class AuthService {
     };
   }
 
+  async signOut(user: UserRequestObject): Promise<void> {
+    await this.userService.updateOne(user.id, {
+      token: null,
+      refreshToken: null,
+    });
+  }
+
   async refreshTokens(
     user: UserRequestObject,
   ): Promise<RefreshTokensResponseDto> {
