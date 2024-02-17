@@ -20,4 +20,6 @@ export class SignUpResponseDto {
   id: number;
 }
 
-export class SignInResponseDto extends SignUpResponseDto {}
+export class SignInResponseDto extends SignUpResponseDto {
+  token: string;
+}

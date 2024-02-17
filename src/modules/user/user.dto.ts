@@ -6,3 +6,10 @@ export class FindOneUserDto {
   id?: number;
   email?: string;
 }
+
+export class UpdateOneUserDto {
+  email?: string;
+  password?: string;
+  name?: string;
+  token?: string;
+}

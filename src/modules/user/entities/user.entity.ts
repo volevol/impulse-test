@@ -9,7 +9,11 @@ export class UserEntity implements User {
   id: number;
   name: string;
   email: string;
+
+  @Exclude()
   token: string;
+
+  @Exclude()
   refreshToken: string;
 
   @Exclude()

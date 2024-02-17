@@ -20,3 +20,5 @@ export const publicRoutes = [
   { path: `${routes.auth.root}/${routes.auth.signUp}`, method: POST },
   { path: `${routes.auth.root}/${routes.auth.signIn}`, method: POST },
 ];
+
+export const TOKEN_EXPIRATION_TIME_IN_HOURS = 1;

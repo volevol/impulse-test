@@ -7,10 +7,16 @@ import {
   SignUpRequestDto,
   SignUpResponseDto,
 } from './auth.dto';
+import { AuthTokenService } from './auth-token.service';
+import config from 'config/config';
+import { TOKEN_EXPIRATION_TIME_IN_HOURS } from '../../utils/constants/common';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private authTokenService: AuthTokenService,
+  ) {}
 
   async signUp({
     email,
@@ -62,8 +68,19 @@ export class AuthService {
     }
     // } mock logic
 
+    const accessToken = this.authTokenService.generateToken(
+      { id: userFromDb.id },
+      TOKEN_EXPIRATION_TIME_IN_HOURS,
+      config.jwtSecret,
+    );
+
+    await this.userService.updateOne(userFromDb.id, {
+      token: accessToken,
+    });
+
     return {
       id: userFromDb.id,
+      token: accessToken,
     };
   }
 }
