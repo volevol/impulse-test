@@ -14,13 +14,15 @@ import {
   REFRESH_TOKEN_EXPIRATION_TIME_IN_HOURS,
   TOKEN_EXPIRATION_TIME_IN_HOURS,
 } from '../../utils/constants/common';
-import { UserRequestObject } from 'src/utils/decorators/user.decorator';
+import { UserRequestObject } from '../../utils/decorators/user.decorator';
+import { AuthCryptoService } from './auth-crypto.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private authTokenService: AuthTokenService,
+    private authCryptoService: AuthCryptoService,
   ) {}
 
   getBothAccessAndRefreshTokens(id: number): string[] {
@@ -65,7 +67,8 @@ export class AuthService {
     name,
   }: SignUpRequestDto): Promise<SignUpResponseDto> {
     const lowerCaseEmail = email.toLowerCase();
-    const encryptedPassword = password; // add this logic later
+    const encryptedPassword =
+      await this.authCryptoService.encryptString(password);
 
     let createdUser: User;
 
@@ -75,7 +78,6 @@ export class AuthService {
         password: encryptedPassword,
         name,
       });
-      console.log('createdUser', createdUser);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
