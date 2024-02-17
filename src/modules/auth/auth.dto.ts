@@ -22,4 +22,7 @@ export class SignUpResponseDto {
 
 export class SignInResponseDto extends SignUpResponseDto {
   token: string;
+  refreshToken: string;
 }
+
+export class RefreshTokensResponseDto extends SignInResponseDto {}

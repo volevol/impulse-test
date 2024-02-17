@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { CreateUserDto, FindOneUserDto, UpdateOneUserDto } from './user.dto';
@@ -43,7 +47,7 @@ export class UserService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw new NotFoundException('No user with such token');
+          throw new UnauthorizedException('Token expired');
         } else {
           throw error;
         }

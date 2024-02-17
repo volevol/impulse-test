@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { Prisma, User } from '@prisma/client';
 import {
+  RefreshTokensResponseDto,
   SignInRequestDto,
   SignInResponseDto,
   SignUpRequestDto,
@@ -9,7 +10,11 @@ import {
 } from './auth.dto';
 import { AuthTokenService } from './auth-token.service';
 import config from 'config/config';
-import { TOKEN_EXPIRATION_TIME_IN_HOURS } from '../../utils/constants/common';
+import {
+  REFRESH_TOKEN_EXPIRATION_TIME_IN_HOURS,
+  TOKEN_EXPIRATION_TIME_IN_HOURS,
+} from '../../utils/constants/common';
+import { UserRequestObject } from 'src/utils/decorators/user.decorator';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +22,42 @@ export class AuthService {
     private userService: UserService,
     private authTokenService: AuthTokenService,
   ) {}
+
+  getBothAccessAndRefreshTokens(id: number): string[] {
+    const accessToken = this.authTokenService.generateToken(
+      { id },
+      TOKEN_EXPIRATION_TIME_IN_HOURS,
+      config.jwtSecret,
+    );
+
+    const refreshToken = this.authTokenService.generateToken(
+      { id },
+      REFRESH_TOKEN_EXPIRATION_TIME_IN_HOURS,
+      config.jwtSecret,
+    );
+
+    return [accessToken, refreshToken];
+  }
+
+  async getUserIfRefreshTokenMatches(
+    refreshToken: string,
+    userId: number,
+  ): Promise<User> {
+    const user = await this.userService.findOne({
+      id: userId,
+    });
+
+    console.log(refreshToken);
+    console.log(user);
+
+    const isRefreshTokenMatching = refreshToken === user.refreshToken;
+
+    if (!isRefreshTokenMatching) {
+      throw new BadRequestException('Wrong credentials!');
+    }
+
+    return user;
+  }
 
   async signUp({
     email,
@@ -68,19 +109,38 @@ export class AuthService {
     }
     // } mock logic
 
-    const accessToken = this.authTokenService.generateToken(
-      { id: userFromDb.id },
-      TOKEN_EXPIRATION_TIME_IN_HOURS,
-      config.jwtSecret,
+    const [accessToken, refreshToken] = this.getBothAccessAndRefreshTokens(
+      userFromDb.id,
     );
 
     await this.userService.updateOne(userFromDb.id, {
       token: accessToken,
+      refreshToken,
     });
 
     return {
       id: userFromDb.id,
       token: accessToken,
+      refreshToken,
+    };
+  }
+
+  async refreshTokens(
+    user: UserRequestObject,
+  ): Promise<RefreshTokensResponseDto> {
+    const [accessToken, refreshToken] = this.getBothAccessAndRefreshTokens(
+      user.id,
+    );
+
+    await this.userService.updateOne(user.id, {
+      token: accessToken,
+      refreshToken,
+    });
+
+    return {
+      id: user.id,
+      token: accessToken,
+      refreshToken,
     };
   }
 }

@@ -12,4 +12,5 @@ export class UpdateOneUserDto {
   password?: string;
   name?: string;
   token?: string;
+  refreshToken?: string;
 }
